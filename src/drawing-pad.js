@@ -1,6 +1,5 @@
-const { ERASER_BUTTON, SECUNDARY_BUTTON,
-    EraserPen, SelectionPen } = require('./pens/index');
-const { PenType } = require('./pens/pen');
+const { EraserPen, SelectionPen } = require('./pens/index');
+const { PenType, ERASER_BUTTON, SECUNDARY_BUTTON } = require('./pens/pen');
 
 
 class DrawingPad {
@@ -47,12 +46,10 @@ class DrawingPad {
     }
 
     handleEvents(event) {
-        if (event.pointerType != "pen")
-            return;
+        //if (event.pointerType != "pen")
+         //   return;
 
         event.stopPropagation();
-
-        console.log(event.type + " " + event.target.tagName + " " + event.buttons);
 
         // when we are in painting mode but button is ERASER_BUTTON we erase instead of paint
         if ("pointerdown" == event.type) {

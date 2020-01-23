@@ -11,33 +11,33 @@ class StylusPen extends Pen {
     }
 
     handleEvents(event, svgPad) {
-        if ("pointerenter" == event.type) {
-            if (this.btnPressed)
-                this.createNewPolyline(svgPad);
-        } else if ("pointermove" == event.type) {
+        if ("pointermove" == event.type) {
             if (this.btnPressed && event.target === svgPad) {
-                this.linePoints.push([event.offsetX, event.offsetY]);
-
-                this.polyline.setAttribute("points", this
-                    .linePoints
-                    .map(v => v[0] + "," + v[1])
-                    .join(" "));
+                this.addPoint(event.offsetX, event.offsetY);
             }
         } else if ("pointerdown" == event.type) {
             this.btnPressed = event.buttons > 0;
-            if (this.btnPressed)
+            if (this.btnPressed) {
                 this.createNewPolyline(svgPad);
+                this.addPoint(event.offsetX, event.offsetY);
+            }
         } else if ("pointerup" == event.type) {
             this.btnPressed = event.buttons > 0;
-            this.endPolyline();
-        } else if ("pointerleave" == event.type) {
-            this.btnPressed = false;
             this.endPolyline();
         }
     }
 
     endPolyline() {
         this.linePoints = [];
+    }
+
+    addPoint(x,y) {
+        this.linePoints.push([x, y]);
+
+        this.polyline.setAttribute("points", this
+            .linePoints
+            .map(v => v[0] + "," + v[1])
+            .join(" "));
     }
 
     createNewPolyline(svgPad) {
