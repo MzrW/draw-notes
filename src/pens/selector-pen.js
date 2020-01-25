@@ -11,16 +11,20 @@ class SelectorPen extends StylusPen {
     handleEvents(event, svgPad) {
         if ("pointerup" == event.type) {
             this.polyline.remove();
-
-            // what do we do with them
-            // this.findSelectedElements(svgPad);
         } else if ((event.buttons & (PRIMARY_BUTTON | SECUNDARY_BUTTON)) > 0)
             super.handleEvents(event, svgPad);
+    }
+
+    createNewPolyline(svgPad) {
+        super.createNewPolyline(svgPad);
+
+        this.polyline.setAttribute("stroke-dasharray", "7,7");
     }
 
     /**
      * 
      * @param {SVGElement} svgPad 
+     * @returns {Element[]}
      */
     findSelectedElements(svgPad) {
         // create array of elements
@@ -34,7 +38,7 @@ class SelectorPen extends StylusPen {
                     .getAttribute("points")
                     .split(" ");
 
-                elements.push({ element: polyline, points: points});
+                elements.push({ element: polyline, points: points });
             }
         }
 
@@ -46,7 +50,7 @@ class SelectorPen extends StylusPen {
                     let pointString = element.points[i];
                     let point = this.mapPointFromString(pointString);
 
-                    if(!pointInsidePolygon(point, this.linePoints))
+                    if (!pointInsidePolygon(point, this.linePoints))
                         return;
                 }
 
@@ -70,6 +74,10 @@ class SelectorPen extends StylusPen {
 
     getPenType() {
         return PenType.selector;
+    }
+
+    getQuickSwitchButton() {
+        return SECUNDARY_BUTTON;
     }
 }
 

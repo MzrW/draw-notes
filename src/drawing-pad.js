@@ -1,8 +1,15 @@
-const { EraserPen, SelectionPen } = require('./pens/index');
-const { PenType, ERASER_BUTTON, SECUNDARY_BUTTON } = require('./pens/pen');
+const Toolbar = require('./toolbar');
+const { QuickSwitchPens } = require('./pens/index');
+const { Pen, PenType } = require('./pens/pen');
+const MovingPen = require('./pens/moving-pen');
 
 
 class DrawingPad {
+    /**
+     * 
+     * @param {Toolbar} toolbar 
+     * @param {SVGElement} pad 
+     */
     constructor(toolbar, pad) {
         this.toolbar = toolbar;
         this.pad = pad;
@@ -27,10 +34,6 @@ class DrawingPad {
         this.toolbar.onPenSelected = (pen) => this.setCurrentPen(pen);
     }
 
-    setCurrentPen(pen) {
-        this.currentPen = pen;
-    }
-
     registerListeners() {
         this.eventTypes.forEach((eventType) => {
             let eventListener = event => this.handleEvents(event);
@@ -45,21 +48,48 @@ class DrawingPad {
         });
     }
 
+
+    /**
+     * Set the current pen
+     * @param {Pen} pen 
+     */
+    setCurrentPen(pen) {
+        this.currentPen.penReplacedBy(pen);
+        this.currentPen = pen;
+    }
+
+    /**
+     * Quickly switch to this pen
+     * @param {Pen} pen 
+     */
+    quickSwitchPen(pen) {
+        this.previousPen = this.currentPen;
+        this.setCurrentPen(pen);
+    }
+
+    undoQuickSwitch() {
+        if (this.previousPen) {
+            this.setCurrentPen(this.previousPen);
+            this.previousPen = undefined;
+        }
+    }
+
+    /**
+     * Handle the event
+     * @param {PointerEvent} event 
+     */
     handleEvents(event) {
         //if (event.pointerType != "pen")
-         //   return;
+        //   return;
 
         event.stopPropagation();
 
         // when we are in painting mode but button is ERASER_BUTTON we erase instead of paint
         if ("pointerdown" == event.type) {
-            if (this.currentPen.getPenType() == PenType.pen) {
-                if ((event.buttons & ERASER_BUTTON) > 0) {
-                    this.previousPen = this.currentPen;
-                    this.setCurrentPen(EraserPen);
-                } else if ((event.buttons & SECUNDARY_BUTTON) > 0) {
-                    this.previousPen = this.currentPen;
-                    this.setCurrentPen(SelectionPen);
+            for (let quickSwitchPen of QuickSwitchPens) {
+                if ((event.buttons & quickSwitchPen.getQuickSwitchButton()) > 0) {
+                    this.quickSwitchPen(quickSwitchPen);
+                    break;
                 }
             }
         }
@@ -67,9 +97,21 @@ class DrawingPad {
         this.currentPen.handleEvents(event, this.pad);
 
         if ("pointerup" == event.type) {
-            if (this.previousPen) {
-                this.setCurrentPen(this.previousPen);
-                this.previousPen = undefined;
+            if (this.currentPen.getPenType() == PenType.selector) {
+                // @ts-ignore 
+                let selectedElements = this.currentPen.findSelectedElements(this.pad);
+                if (selectedElements.length > 0) {
+                    let movingPen = new MovingPen(selectedElements, this.pad);
+                    movingPen.onEndMoving = () => {
+                        this.undoQuickSwitch();
+                    };
+                    this.setCurrentPen(movingPen);
+                } else {
+                    this.undoQuickSwitch();
+                }
+            }
+            if (this.currentPen.isQuickSwitchPen() && this.previousPen) {
+                this.undoQuickSwitch();
             }
         }
     }

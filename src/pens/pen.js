@@ -17,12 +17,43 @@ class Pen {
         this.bgColor = bgColor;
     }
 
+    /**
+     * Handle the event
+     * @param {PointerEvent} event
+     * @param {SVGElement} svgPad
+     */
     handleEvents(event, svgPad) {
         throw new Error("Must be overridden");
     }
 
+    /**
+     * Override this method to be notified when this pen is replaced by another one.
+     * @param {Pen} pen another pen
+     */
+    penReplacedBy(pen) {
+
+    }
+
+    /**
+     * @return {string}
+     */
     getPenType() {
         throw new Error("Must be overridden");
+    }
+
+    /**
+     * If the pointerevent's event.button contains this value, we switch to this pen quickly.
+     * @return {number} the value 
+     */
+    getQuickSwitchButton() {
+        return 0;
+    }
+
+    /**
+     * @return {Boolean} true if this is a quickSwitchPen
+     */
+    isQuickSwitchPen() {
+        return this.getQuickSwitchButton() != 0;
     }
 }
 

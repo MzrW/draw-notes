@@ -6,6 +6,11 @@ const Initial = new StylusPen("black pen", "create.svg", 2, "black", "white");
 const Eraser = new EraserPen("eraser", "delete.svg");
 const Selection = new SelectorPen("select", "select.svg", 2, "gray");
 
+const QuickSwitchPens = [
+    Eraser,
+    Selection
+];
+
 const Pens = [
     Selection,
     Eraser,
@@ -21,5 +26,6 @@ module.exports = {
     EraserPen: Eraser,
     SelectionPen: Selection,
 
+    QuickSwitchPens: QuickSwitchPens,
     Pens: Pens
 };

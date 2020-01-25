@@ -18,6 +18,10 @@ class EraserPen extends Pen {
     getPenType() {
         return PenType.eraser;
     }
+
+    getQuickSwitchButton() {
+        return ERASER_BUTTON;
+    }
 }
 
 module.exports = EraserPen;

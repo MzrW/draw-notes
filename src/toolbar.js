@@ -1,3 +1,4 @@
+const { Pen } = require('./pens/pen');
 const { InitialPen, Pens} = require('./pens/index');
 
 class Toolbar {
@@ -39,15 +40,26 @@ class Toolbar {
         });
     }
 
+    /**
+     * @returns {Pen} the selected pen
+     */
     getSelectedPen() {
         return this.selectedPen;
     }
 
+    /**
+     * 
+     * @param {Pen} pen 
+     */
     setSelectedPen(pen) {
         this.selectedPen = pen;
         this.onPenSelected(pen);
     }
 
+    /**
+     * Override this method to get notified when a pen is selected.
+     * @param {Pen} pen 
+     */
     onPenSelected(pen) { }
 }
 
