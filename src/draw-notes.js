@@ -1,7 +1,6 @@
 const Toolbar = require('./toolbar');
 const DrawingPad = require('./drawing-pad');
 
-
 class DrawNotes {
     constructor(toolbar, pad) {
         this.toolbar = new Toolbar(toolbar);
@@ -11,6 +10,11 @@ class DrawNotes {
     init() {
         this.toolbar.init();
         this.pad.init();
+    }
+
+    deinit() {
+        this.toolbar.deinit();
+        this.pad.deinit();
     }
 }
 

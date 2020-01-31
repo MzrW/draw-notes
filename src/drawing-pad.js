@@ -2,15 +2,17 @@ const Toolbar = require('./toolbar');
 const { QuickSwitchPens } = require('./pens/index');
 const { Pen, PenType } = require('./pens/pen');
 const MovingPen = require('./pens/moving-pen');
+const ResizeableWrapper = require('./resizeable-wrapper');
 
 
-class DrawingPad {
+class DrawingPad extends ResizeableWrapper {
     /**
      * 
      * @param {Toolbar} toolbar 
      * @param {SVGElement} pad 
      */
     constructor(toolbar, pad) {
+        super(pad);
         this.toolbar = toolbar;
         this.pad = pad;
         this.eventTypes = [
@@ -22,21 +24,33 @@ class DrawingPad {
             "pointercancel",
             "pointerout",
             "pointerleave",
+            "contextmenu"
         ];
-        this.eventListeners = {};
-
-        this.currentPen = this.toolbar.getSelectedPen();
-        this.previousPen = undefined;
     }
 
     init() {
+        super.init();
+        this.eventListeners = {};
+
+        this.currentPen = this.toolbar.getSelectedPen();
+        this.previousPen = [];
+
         this.registerListeners();
         this.toolbar.onPenSelected = (pen) => this.setCurrentPen(pen);
+
+        this.pad.style.touchAction = "none";
+    }
+
+    deinit() {
+        super.deinit();
+        this.removeListeners();
+
+        this.pad.style.removeProperty("touch-action");
     }
 
     registerListeners() {
         this.eventTypes.forEach((eventType) => {
-            let eventListener = event => this.handleEvents(event);
+            let eventListener = event => { return this.handleEvents(event); };
             this.pad.addEventListener(eventType, eventListener);
             this.eventListeners[eventType] = eventListener;
         });
@@ -63,14 +77,13 @@ class DrawingPad {
      * @param {Pen} pen 
      */
     quickSwitchPen(pen) {
-        this.previousPen = this.currentPen;
+        this.previousPen.push(this.currentPen);
         this.setCurrentPen(pen);
     }
 
     undoQuickSwitch() {
-        if (this.previousPen) {
-            this.setCurrentPen(this.previousPen);
-            this.previousPen = undefined;
+        if (this.previousPen.length) {
+            this.setCurrentPen(this.previousPen.pop());
         }
     }
 
@@ -82,7 +95,11 @@ class DrawingPad {
         //if (event.pointerType != "pen")
         //   return;
 
-        event.stopPropagation();
+        event.preventDefault();
+        //event.stopPropagation();
+
+        if (event.type == "contextmenu")
+            return false;
 
         // when we are in painting mode but button is ERASER_BUTTON we erase instead of paint
         if ("pointerdown" == event.type) {
@@ -105,7 +122,7 @@ class DrawingPad {
                     movingPen.onEndMoving = () => {
                         this.undoQuickSwitch();
                     };
-                    this.setCurrentPen(movingPen);
+                    this.quickSwitchPen(movingPen);
                 } else {
                     this.undoQuickSwitch();
                 }

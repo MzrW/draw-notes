@@ -1,9 +1,9 @@
-const { Pen, PenType} = require("./pen");
+const { Pen, PenType } = require("./pen");
 
 class StylusPen extends Pen {
     constructor(name, icon, size = undefined, color = undefined, bgColor = "black") {
         super(name, icon, size, color, bgColor);
-        
+
         this.btnPressed = false;
 
         this.linePoints = null;
@@ -28,10 +28,13 @@ class StylusPen extends Pen {
     }
 
     endPolyline() {
+        if (this.linePoints.length < 2
+            && this.polyline)
+            this.polyline.remove();
         this.linePoints = [];
     }
 
-    addPoint(x,y) {
+    addPoint(x, y) {
         this.linePoints.push([x, y]);
 
         this.polyline.setAttribute("points", this

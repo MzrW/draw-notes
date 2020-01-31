@@ -1,17 +1,36 @@
 const { Pen } = require('./pens/pen');
-const { InitialPen, Pens} = require('./pens/index');
+const { InitialPen, Pens } = require('./pens/index');
+
+const ToolbarStyle = require('./toolbar.styles');
 
 class Toolbar {
+    /**
+     * 
+     * @param {HTMLElement} toolbar 
+     */
     constructor(toolbar) {
-        this.toolbar = toolbar;
+        this.rootElement = toolbar;
         this.selectedPen = InitialPen;
         this.selectedDiv = undefined;
     }
 
     init() {
+        this.toolbar = document.createElement("div");
+        this.rootElement.appendChild(this.toolbar);
+
+        this.shadow = this.toolbar.attachShadow({ mode: "open" });
+
+        let style = document.createElement("style");
+        style.innerHTML = ToolbarStyle;
+        this.shadow.appendChild(style);
+
+        let toolbar = document.createElement("div");
+        toolbar.classList.add("toolbar");
+        this.shadow.appendChild(toolbar);
+
         Pens.forEach(pen => {
             let div = document.createElement("div");
-            this.toolbar.appendChild(div);
+            toolbar.appendChild(div);
 
             let img = document.createElement("img");
             div.appendChild(img);
@@ -38,6 +57,10 @@ class Toolbar {
             p.style.color = pen.bgColor;
             p.textContent = pen.name;
         });
+    }
+
+    deinit() {
+        this.toolbar.remove();
     }
 
     /**
